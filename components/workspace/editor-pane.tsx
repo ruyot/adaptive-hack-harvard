@@ -163,13 +163,21 @@ export default function EditorPane() {
                     style={activeTab === tab ? { backgroundColor: "#0077dd" } : {}}
                   >
                     <span className="max-w-[150px] truncate">{getFileName(tab)}</span>
-                    <button
+                    <div
                       onClick={(e) => handleCloseTab(tab, e)}
-                      className="opacity-0 group-hover:opacity-100 hover:bg-white/20 rounded p-0.5 transition-opacity"
+                      className="opacity-0 group-hover:opacity-100 hover:bg-white/20 rounded p-0.5 transition-opacity cursor-pointer"
                       aria-label={`Close ${tab}`}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          handleCloseTab(tab, e as any)
+                        }
+                      }}
                     >
                       <X className="w-3 h-3" />
-                    </button>
+                    </div>
                   </button>
                 ))}
               </div>

@@ -18,9 +18,16 @@ export default function AssessmentPage() {
   const router = useRouter()
   const [showSubmitDialog, setShowSubmitDialog] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
+  const [isAutoSubmit, setIsAutoSubmit] = useState(false)
 
   const handleSubmit = () => {
     setShowSubmitDialog(true)
+  }
+
+  const handleAutoSubmit = () => {
+    setIsAutoSubmit(true)
+    localStorage.setItem("adaptive_completed", "true")
+    router.push("/thanks")
   }
 
   const confirmSubmit = () => {
@@ -30,7 +37,11 @@ export default function AssessmentPage() {
 
   return (
     <div className="h-screen flex flex-col bg-background">
-      <WorkspaceHeader onSubmit={handleSubmit} onShowPreview={() => setShowPreview(true)} />
+      <WorkspaceHeader 
+        onSubmit={handleAutoSubmit} 
+        onManualSubmit={handleSubmit}
+        onShowPreview={() => setShowPreview(true)} 
+      />
       <WorkspacePanels showPreview={showPreview} onHidePreview={() => setShowPreview(false)} />
 
       <Dialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>

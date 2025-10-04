@@ -85,8 +85,8 @@ export default function DocsPane() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="problem" className="flex-1 overflow-auto p-6 m-0">
-          <div className="prose prose-sm max-w-none prose-headings:text-brand-900 prose-p:text-foreground prose-li:text-foreground">
+        <TabsContent value="problem" className="flex-1 overflow-auto p-6 m-0 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+          <div className="prose prose-sm max-w-none prose-headings:text-brand-900 prose-p:text-foreground prose-li:text-foreground prose-h1:text-xl prose-h2:text-lg prose-h3:text-base">
             <ReactMarkdown>{problemStatement}</ReactMarkdown>
           </div>
         </TabsContent>
