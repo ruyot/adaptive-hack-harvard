@@ -17,6 +17,7 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('API key found, length:', apiKey.length)
+    console.log('API key starts with:', apiKey.substring(0, 10) + '...')
 
     const { message, context } = await request.json()
 
@@ -70,7 +71,14 @@ User Message: ${message}`
       body: JSON.stringify(payload)
     }
 
+    console.log('Sending request to Gemini API...')
+    console.log('URL:', url)
+    console.log('Payload:', JSON.stringify(payload, null, 2))
+    
     const response = await fetch(url, options)
+    
+    console.log('Response status:', response.status)
+    console.log('Response headers:', Object.fromEntries(response.headers.entries()))
     
     if (!response.ok) {
       const errorData = await response.text()
