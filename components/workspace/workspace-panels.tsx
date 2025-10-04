@@ -16,7 +16,7 @@ interface WorkspacePanelsProps {
 
 export default function WorkspacePanels({ showPreview, onHidePreview }: WorkspacePanelsProps) {
   const isMobile = useMobile()
-  const [rightSize, setRightSize] = useState(25)
+  const [rightSize, setRightSize] = useState(20) // Much smaller like in the image
 
   useEffect(() => {
     const savedRight = localStorage.getItem("adaptive_right_panel_size")
@@ -70,7 +70,7 @@ export default function WorkspacePanels({ showPreview, onHidePreview }: Workspac
 
         <PanelResizeHandle className="w-1 bg-border hover:bg-brand-700/50 transition-colors" />
 
-        <Panel defaultSize={rightSize} minSize={20} maxSize={40} onResize={handleRightResize}>
+        <Panel defaultSize={rightSize} minSize={15} maxSize={30} onResize={handleRightResize}>
           <ChatPane />
         </Panel>
       </PanelGroup>

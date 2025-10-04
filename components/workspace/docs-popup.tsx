@@ -73,9 +73,14 @@ export default function DocsPopup() {
 
   return (
     <div
-      className={`absolute bottom-4 left-4 right-4 transition-all duration-300 ${
+      className={`absolute bottom-4 left-1/2 transform -translate-x-1/2 transition-all duration-300 ${
         isMinimized ? "h-14" : "h-[400px]"
       } z-10`}
+      style={{
+        width: 'calc(70% - 2rem)', // Covers more of the middle section
+        maxWidth: '900px',
+        minWidth: '500px'
+      }}
     >
       <div
         className="h-full rounded-lg border border-border/50 shadow-2xl flex flex-col overflow-hidden"

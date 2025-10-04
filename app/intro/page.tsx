@@ -8,6 +8,8 @@ export default function IntroPage() {
   const router = useRouter()
 
   const handleStart = () => {
+    // Clear any existing timer to restart it fresh
+    localStorage.removeItem("adaptive_timer_start")
     router.push("/assessment")
   }
 

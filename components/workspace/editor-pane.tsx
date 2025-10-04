@@ -142,7 +142,7 @@ export default function EditorPane() {
 
       <div className="flex-1 overflow-hidden">
         <PanelGroup direction="horizontal">
-          <Panel defaultSize={30} minSize={20} maxSize={50}>
+          <Panel defaultSize={20} minSize={15} maxSize={30}>
             <FileTree files={Object.keys(mockFiles)} selectedFile={activeTab} onFileSelect={handleFileSelect} />
           </Panel>
 

@@ -29,7 +29,8 @@ export default function WorkspaceHeader({ onSubmit, onManualSubmit, onShowPrevie
       
       if (remaining === 0) {
         setIsExpired(true)
-        onSubmit() // Auto-submit when timer expires
+        // Use setTimeout to defer the auto-submit call
+        setTimeout(() => onSubmit(), 0)
       }
     }
 
@@ -37,7 +38,8 @@ export default function WorkspaceHeader({ onSubmit, onManualSubmit, onShowPrevie
       setTimeLeft((prev) => {
         if (prev <= 1) {
           setIsExpired(true)
-          onSubmit() // Auto-submit when timer expires
+          // Use setTimeout to defer the auto-submit call
+          setTimeout(() => onSubmit(), 0)
           return 0
         }
         return prev - 1
