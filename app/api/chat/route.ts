@@ -1,17 +1,29 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { NextRequest, NextResponse } from 'next/server'
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || '')
-
-const model = genAI.getGenerativeModel({ 
-  model: "gemini-1.5-flash",
-  generationConfig: {
-    temperature: 0.7,
-    topP: 0.8,
-    topK: 40,
-    maxOutputTokens: 1024,
+// Initialize Gemini AI with API key
+function getGeminiAI() {
+  const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY
+  
+  if (!apiKey) {
+    throw new Error('GEMINI_API_KEY not found in environment variables')
   }
-})
+  
+  return new GoogleGenerativeAI(apiKey)
+}
+
+function getGeminiModel() {
+  const genAI = getGeminiAI()
+  return genAI.getGenerativeModel({ 
+    model: "gemini-1.5-flash",
+    generationConfig: {
+      temperature: 0.7,
+      topP: 0.8,
+      topK: 40,
+      maxOutputTokens: 1024,
+    }
+  })
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,6 +31,7 @@ export async function POST(request: NextRequest) {
     const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY
     if (!apiKey) {
       console.error('Gemini API key not found in environment variables')
+      console.error('Available env vars:', Object.keys(process.env).filter(key => key.includes('GEMINI')))
       return NextResponse.json(
         { 
           success: false, 
@@ -27,6 +40,8 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       )
     }
+
+    console.log('API key found, length:', apiKey.length)
 
     const { message, context } = await request.json()
 
@@ -53,6 +68,7 @@ Guidelines:
 
 User Message: ${message}`
 
+    const model = getGeminiModel()
     const result = await model.generateContent(systemPrompt)
     const response = await result.response
     const text = response.text()
