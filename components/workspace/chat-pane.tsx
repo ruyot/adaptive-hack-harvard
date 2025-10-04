@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Send, Copy, Bot, User } from "lucide-react"
 import ReactMarkdown from "react-markdown"
+import { sendToGemini, type ChatContext } from "@/lib/gemini"
 
 interface Message {
   id: string
@@ -18,7 +19,7 @@ const systemMessage: Message = {
   id: "system",
   role: "system",
   content:
-    "Tip: The internal docs have exact function signatures. Use the Repo Docs tab to find implementation details.",
+    "I'm your AI coding assistant! I can help you with the authentication challenge, explain code concepts, debug issues, and provide implementation guidance. Ask me anything about the problem or your code.",
 }
 
 export default function ChatPane() {
@@ -46,16 +47,76 @@ export default function ChatPane() {
     setInput("")
     setIsLoading(true)
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      // Create context for Gemini
+      const context: ChatContext = {
+        problemStatement: `# Build a User Authentication Feature
+
+## Overview
+Implement a user authentication system that allows users to sign up, log in, and manage their sessions.
+
+## Requirements
+
+### 1. Sign Up Flow
+- Create a registration form with email and password fields
+- Validate email format and password strength (min 8 characters)
+- Store user credentials securely
+- Show appropriate error messages for validation failures
+
+### 2. Login Flow
+- Create a login form with email and password fields
+- Authenticate users against stored credentials
+- Create a session token upon successful login
+- Handle incorrect credentials gracefully
+
+### 3. Session Management
+- Implement session persistence using JWT tokens
+- Add middleware to protect authenticated routes
+- Provide a logout functionality that clears the session
+
+## Technical Constraints
+- Use the existing API endpoints in \`/src/api/auth\`
+- Follow the authentication patterns in the repo docs
+- Ensure all forms are accessible (ARIA labels, keyboard navigation)
+- Write unit tests for authentication logic
+
+## Evaluation Criteria
+- Code quality and organization
+- Proper error handling
+- Security best practices
+- Test coverage
+- User experience considerations`,
+        activeFile: "src/api/auth.ts",
+        availableFiles: ["src/api/auth.ts", "src/components/auth-form.tsx", "src/pages/login.tsx"],
+        currentCode: `export async function signup(email: string, password: string) {
+  // TODO: Implement signup logic
+  return { success: false, error: 'Not implemented' }
+}
+
+export async function login(email: string, password: string) {
+  // TODO: Implement login logic
+  return { success: false, error: 'Not implemented' }
+}`
+      }
+
+      const response = await sendToGemini(input, context)
+      
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: `Based on the repository documentation, here's what I found:\n\nThe authentication API is located in \`/src/api/auth.ts\`. You'll need to implement the \`signup\` and \`login\` functions.\n\nFor the signup flow:\n1. Validate the email format\n2. Check password strength (minimum 8 characters)\n3. Hash the password using bcrypt\n4. Store the user in the database\n\nRefer to [Repo Docs → API → auth] for the exact function signatures.`,
+        content: response,
       }
       setMessages((prev) => [...prev, assistantMessage])
+    } catch (error) {
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: "Sorry, I'm having trouble connecting to the AI assistant right now. Please try again in a moment.",
+      }
+      setMessages((prev) => [...prev, errorMessage])
+    } finally {
       setIsLoading(false)
-    }, 1500)
+    }
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -98,7 +159,11 @@ export default function ChatPane() {
                   message.role === "user" ? "bg-[#0077dd] text-white p-3 rounded-lg prose-p:text-white" : ""
                 }`}
               >
-                <ReactMarkdown>{message.content}</ReactMarkdown>
+                {message.role === "system" ? (
+                  <p className="text-sm text-muted-foreground">{message.content}</p>
+                ) : (
+                  <ReactMarkdown>{message.content}</ReactMarkdown>
+                )}
               </div>
               {message.role === "assistant" && (
                 <Button
