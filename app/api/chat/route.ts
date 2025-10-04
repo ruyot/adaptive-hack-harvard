@@ -1,29 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai'
 import { NextRequest, NextResponse } from 'next/server'
-
-// Initialize Gemini AI with API key
-function getGeminiAI() {
-  const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY
-  
-  if (!apiKey) {
-    throw new Error('GEMINI_API_KEY not found in environment variables')
-  }
-  
-  return new GoogleGenerativeAI(apiKey)
-}
-
-function getGeminiModel() {
-  const genAI = getGeminiAI()
-  return genAI.getGenerativeModel({ 
-    model: "gemini-1.5-flash",
-    generationConfig: {
-      temperature: 0.7,
-      topP: 0.8,
-      topK: 40,
-      maxOutputTokens: 1024,
-    }
-  })
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -62,16 +37,55 @@ Guidelines:
 - Suggest best practices for the given tech stack (TypeScript, React, Next.js)
 - Help debug errors and explain solutions clearly
 - Be concise but comprehensive in your responses
-- Focus on helping the candidate solve the assessment challenge
-- If asked about implementation details, provide working code examples
+- Focus on helping the candidate solve the assessment challenge and go above and beyond.
+- If asked about implementation details, provide working code examples by referencing existing code in the context.
 - Always consider security, performance, and maintainability
 
 User Message: ${message}`
 
-    const model = getGeminiModel()
-    const result = await model.generateContent(systemPrompt)
-    const response = await result.response
-    const text = response.text()
+    // Use direct REST API call like your example
+    const payload = {
+      contents: [
+        {
+          parts: [
+            { text: systemPrompt },
+          ],
+        },
+      ],
+      generationConfig: {
+        temperature: 0.7,
+        topP: 0.8,
+        topK: 40,
+        maxOutputTokens: 1024,
+      }
+    }
+
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': apiKey,
+      },
+      body: JSON.stringify(payload)
+    }
+
+    const response = await fetch(url, options)
+    
+    if (!response.ok) {
+      const errorData = await response.text()
+      console.error('Gemini API Error Response:', errorData)
+      throw new Error(`Gemini API error: ${response.status} ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    
+    if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+      console.error('Unexpected Gemini API response:', data)
+      throw new Error('Invalid response from Gemini API')
+    }
+
+    const text = data.candidates[0].content.parts[0].text
 
     return NextResponse.json({ 
       success: true, 
